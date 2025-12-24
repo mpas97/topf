@@ -27,6 +27,9 @@ type TopfConfig struct {
 	NodesProvider string `yaml:"nodesProvider,omitempty"`
 
 	Nodes []Node `yaml:"nodes"`
+
+	// Data can contain arbitrary data that can be used when templating patches
+	Data map[string]any `yaml:"data"`
 }
 
 // LoadFromFile loads the TopfConfig from a YAML file

@@ -91,9 +91,11 @@ func (t *topf) Nodes(ctx context.Context) ([]*Node, error) {
 			logger.Debug("generating configuration bundle")
 
 			patchContext := &config.PatchContext{
-				ClusterName:     t.Config().ClusterName,
-				ClusterEndpoint: t.Config().ClusterEndpoint.String(),
-				Node:            node.Node,
+				ClusterName:       t.Config().ClusterName,
+				ClusterEndpoint:   t.Config().ClusterEndpoint.String(),
+				KubernetesVersion: t.Config().KubernetesVersion,
+				Node:              node.Node,
+				Data:              t.Config().Data,
 			}
 
 			patches, err := patchContext.Load()

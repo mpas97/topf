@@ -61,6 +61,7 @@ If patches end with `yaml.tpl`, you can use go templating in them. There you can
 
 * `.ClusterName`
 * `.ClusterEndpoint`
+* `.Data.<key>` (from `topf.yaml`, cou can add arbitrary global data at under "data")
 * `.Node.Host`
 * `.Node.Role`
 * `.Node.IP` (if set)
@@ -72,5 +73,5 @@ Example:
 machine:
   kubelet:
     extraArgs:
-      provider-id: {{ .Data.uuid }}
+      provider-id: {{ .Node.Data.uuid }}
 ```

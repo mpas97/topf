@@ -15,9 +15,11 @@ import (
 
 // PatchContext are the things that can be templated in patches
 type PatchContext struct {
-	ClusterName     string
-	ClusterEndpoint string
-	*Node
+	ClusterName       string
+	ClusterEndpoint   string
+	KubernetesVersion string
+	Data              map[string]any
+	Node              *Node
 }
 
 // Load loads all patches applicable for the node This includes general patches,
@@ -30,7 +32,7 @@ func (p *PatchContext) Load() (patches []configpatcher.Patch, err error) {
 	}
 
 	// patches relating to role of node, control-plane or worker
-	rolePatches, err := p.loadFolder(string(p.Role))
+	rolePatches, err := p.loadFolder(string(p.Node.Role))
 	if err != nil {
 		return
 	}
@@ -38,7 +40,7 @@ func (p *PatchContext) Load() (patches []configpatcher.Patch, err error) {
 	patches = append(patches, rolePatches...)
 
 	// patches relating to single specific node
-	nodePatches, err := p.loadFolder(filepath.Join("node", p.Host))
+	nodePatches, err := p.loadFolder(filepath.Join("node", p.Node.Host))
 	if err != nil {
 		return
 	}
