@@ -67,12 +67,12 @@ func LoadFromFile(path string, nodesRegexFilter string) (config *TopfConfig, err
 			return nil, fmt.Errorf("failed to parse nodes from provider: %w", err)
 		}
 
-		for _, n := range nodes {
-			if nodesFilter.MatchString(n.Host) {
-				config.Nodes = append(config.Nodes, n)
-			}
-		}
+		config.Nodes = append(config.Nodes, nodes...)
 	}
+
+	config.Nodes = slices.DeleteFunc(config.Nodes, func(n Node) bool {
+		return !nodesFilter.MatchString(n.Host)
+	})
 
 	// Sort nodes by role and hostname, such that control plane nodes come first
 	slices.SortStableFunc(config.Nodes, func(a, b Node) int {
