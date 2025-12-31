@@ -8,9 +8,7 @@ import (
 	"strings"
 
 	"github.com/postfinance/topf/internal/interactive"
-	"github.com/postfinance/topf/pkg/config"
 	"github.com/siderolabs/talos/pkg/machinery/api/machine"
-	talosconfig "github.com/siderolabs/talos/pkg/machinery/config"
 	"github.com/siderolabs/talos/pkg/machinery/config/encoder"
 )
 
@@ -28,14 +26,7 @@ func (n *Node) Apply(ctx context.Context, logger *slog.Logger, confirm bool) (bo
 	}
 	defer nodeClient.Close()
 
-	var provider talosconfig.Provider
-	if n.Node.Role == config.RoleControlPlane {
-		provider = n.ConfigBundle.ControlPlaneCfg
-	} else {
-		provider = n.ConfigBundle.WorkerCfg
-	}
-
-	configBytes, err := provider.EncodeBytes(encoder.WithComments(encoder.CommentsDisabled), encoder.WithOmitEmpty(true))
+	configBytes, err := n.ConfigProvider().EncodeBytes(encoder.WithComments(encoder.CommentsDisabled), encoder.WithOmitEmpty(true))
 	if err != nil {
 		return false, err
 	}

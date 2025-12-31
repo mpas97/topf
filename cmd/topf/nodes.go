@@ -9,7 +9,6 @@ import (
 
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/postfinance/topf/internal/topf"
-	"github.com/postfinance/topf/pkg/config"
 	"github.com/siderolabs/talos/pkg/machinery/config/encoder"
 	"github.com/urfave/cli/v3"
 	"go.yaml.in/yaml/v4"
@@ -147,19 +146,8 @@ func writeMachineConfigs(nodes []*topf.Node, outputDir string) error {
 			continue
 		}
 
-		// Determine which config to use based on the node's role
-		var provider interface {
-			EncodeBytes(...encoder.Option) ([]byte, error)
-		}
-
-		if node.Node.Role == config.RoleControlPlane {
-			provider = node.ConfigBundle.ControlPlaneCfg
-		} else {
-			provider = node.ConfigBundle.WorkerCfg
-		}
-
 		// Encode the config to YAML
-		configBytes, err := provider.EncodeBytes(
+		configBytes, err := node.ConfigProvider().EncodeBytes(
 			encoder.WithComments(encoder.CommentsDisabled),
 			encoder.WithOmitEmpty(true),
 		)

@@ -4,6 +4,7 @@ import (
 	"log/slog"
 
 	"github.com/postfinance/topf/pkg/config"
+	talosconfig "github.com/siderolabs/talos/pkg/machinery/config"
 	"github.com/siderolabs/talos/pkg/machinery/config/bundle"
 	"github.com/siderolabs/talos/pkg/machinery/resources/runtime"
 )
@@ -28,7 +29,7 @@ type Node struct {
 }
 
 // MarshalYAML implements custom YAML marshalling to properly serialize the Error field
-func (n *Node) MarshalYAML() (interface{}, error) {
+func (n *Node) MarshalYAML() (any, error) {
 	// Create a struct with only the exported fields we want to marshal
 	aux := &struct {
 		Node          *config.Node              `yaml:"node"`
@@ -53,4 +54,17 @@ func (n *Node) MarshalYAML() (interface{}, error) {
 // Attrs returns a key/value for use with slog.Logger.With
 func (n *Node) Attrs() slog.Attr {
 	return slog.String("node", n.Node.Host)
+}
+
+// ConfigProvider returns the config bundle associated with the node's role
+func (n *Node) ConfigProvider() talosconfig.Provider {
+	var provider talosconfig.Provider
+
+	if n.Node.Role == config.RoleControlPlane {
+		provider = n.ConfigBundle.ControlPlaneCfg
+	} else {
+		provider = n.ConfigBundle.WorkerCfg
+	}
+
+	return provider
 }

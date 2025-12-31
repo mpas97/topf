@@ -65,7 +65,7 @@ func Execute(ctx context.Context, t topf.Topf, opts Options) error {
 	for _, node := range nodes {
 		logger := logger.With(node.Attrs())
 
-		installerImage := node.ConfigBundle.WorkerCfg.Machine().Install().Image()
+		installerImage := node.ConfigProvider().Machine().Install().Image()
 
 		schematic, talosVersion, err := extractSchematicAndVersion(installerImage)
 		if err != nil {

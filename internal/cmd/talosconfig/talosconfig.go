@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/postfinance/topf/internal/topf"
+	"github.com/postfinance/topf/pkg/config"
 	"github.com/siderolabs/talos/pkg/machinery/config/bundle"
 	"github.com/siderolabs/talos/pkg/machinery/config/generate"
 )
@@ -33,13 +34,37 @@ func Generate(t topf.Topf) ([]byte, error) {
 		return nil, err
 	}
 
-	// setting nodes/endpoints directly is only safe in a single node cluster because we can't
-	// anticipate what commands the user is going to make. even though some commands work
-	// when multiple endpoints are specified, some may throw errors like "no request forwarding"
-	if len(t.Config().Nodes) == 1 {
-		endpoints := []string{t.Config().Nodes[0].Endpoint()}
-		configBundle.TalosCfg.Contexts[t.Config().ClusterName].Nodes = endpoints
-		configBundle.TalosCfg.Contexts[t.Config().ClusterName].Endpoints = endpoints
+	clusterName := t.Config().ClusterName
+	nodes := t.Config().Nodes
+
+	// For single-node clusters, add the single node as both endpoint and node
+	if len(nodes) == 1 {
+		endpoint := nodes[0].Endpoint()
+		configBundle.TalosCfg.Contexts[clusterName].Endpoints = []string{endpoint}
+		configBundle.TalosCfg.Contexts[clusterName].Nodes = []string{endpoint}
+	} else {
+		// For multi-node clusters:
+		// - endpoints: all control-plane nodes
+		// - nodes: all nodes
+		var (
+			endpoints []string
+			allNodes  []string
+		)
+
+		for _, node := range nodes {
+			allNodes = append(allNodes, node.Endpoint())
+			if node.Role == config.RoleControlPlane {
+				endpoints = append(endpoints, node.Endpoint())
+			}
+		}
+
+		if len(endpoints) > 0 {
+			configBundle.TalosCfg.Contexts[clusterName].Endpoints = endpoints
+		}
+
+		if len(allNodes) > 0 {
+			configBundle.TalosCfg.Contexts[clusterName].Nodes = allNodes
+		}
 	}
 
 	return configBundle.TalosCfg.Bytes()
