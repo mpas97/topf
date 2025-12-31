@@ -2,6 +2,7 @@ package config
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"html/template"
 	"io/fs"
@@ -10,6 +11,7 @@ import (
 	"regexp"
 	"strings"
 
+	jsonpatch "github.com/evanphx/json-patch"
 	"github.com/siderolabs/talos/pkg/machinery/config/configpatcher"
 )
 
@@ -125,7 +127,7 @@ func (p *PatchContext) loadFile(filename string) (configpatcher.Patch, error) {
 	}
 
 	if strings.HasSuffix(filename, ".tpl") {
-		tmpl, err := template.New("config").Parse(string(content))
+		tmpl, err := template.New("config").Option("missingkey=error").Parse(string(content))
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse template for patch %s: %w", filename, err)
 		}
@@ -138,5 +140,11 @@ func (p *PatchContext) loadFile(filename string) (configpatcher.Patch, error) {
 		content = buf.Bytes()
 	}
 
-	return configpatcher.LoadPatch(content)
+	// early error with JSON patches, as TOPF (and talos v1.12+) are not supporting those
+	patch, err := configpatcher.LoadPatch(content)
+	if _, isJSONPatch := patch.(jsonpatch.Patch); isJSONPatch {
+		return nil, errors.New("TOPF doesn't not support JSON patches")
+	}
+
+	return patch, err
 }
