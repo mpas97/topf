@@ -96,6 +96,7 @@ func (t *topf) Nodes(ctx context.Context) ([]*Node, error) {
 				KubernetesVersion: t.Config().KubernetesVersion,
 				Node:              node.Node,
 				Data:              t.Config().Data,
+				ConfigDir:         t.configDir,
 			}
 
 			patches, err := patchContext.Load()

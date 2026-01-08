@@ -33,6 +33,12 @@ func main() {
 				Sources: cli.EnvVars("TOPFCONFIG"),
 			},
 			&cli.StringFlag{
+				Name:    "config-dir",
+				Value:   ".",
+				Usage:   "directory from which to read the configuration (patches)",
+				Sources: cli.EnvVars("TOPF_CONFIG_DIR"),
+			},
+			&cli.StringFlag{
 				Name:    "nodes",
 				Value:   "",
 				Usage:   "use a regex expression to select a subset of nodes to work upon",
@@ -49,6 +55,7 @@ func main() {
 			// passing down the Topf runtime to all commands via context
 			topf, err := topf.NewTopfRuntime(
 				c.String("topfconfig"),
+				c.String("config-dir"),
 				c.String("nodes"),
 				c.String("log-level"),
 			)

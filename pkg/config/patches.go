@@ -23,19 +23,20 @@ type PatchContext struct {
 	KubernetesVersion string
 	Data              map[string]any
 	Node              *Node
+	ConfigDir         string
 }
 
 // Load loads all patches applicable for the node This includes general patches,
 // role (worker/control-plane) specific patches and node specific patches in
 // that order
 func (p *PatchContext) Load() (patches []configpatcher.Patch, err error) {
-	patches, err = p.loadFolder("patches")
+	patches, err = p.loadFolder(filepath.Join(p.ConfigDir, "patches"))
 	if err != nil {
 		return
 	}
 
 	// patches relating to role of node, control-plane or worker
-	rolePatches, err := p.loadFolder(string(p.Node.Role))
+	rolePatches, err := p.loadFolder(filepath.Join(p.ConfigDir, string(p.Node.Role)))
 	if err != nil {
 		return
 	}
@@ -43,7 +44,7 @@ func (p *PatchContext) Load() (patches []configpatcher.Patch, err error) {
 	patches = append(patches, rolePatches...)
 
 	// patches relating to single specific node
-	nodePatches, err := p.loadFolder(filepath.Join("node", p.Node.Host))
+	nodePatches, err := p.loadFolder(filepath.Join(p.ConfigDir, "node", p.Node.Host))
 	if err != nil {
 		return
 	}

@@ -29,7 +29,7 @@ type Topf interface {
 }
 
 // NewTopfRuntime creates a new Topf runtime from the given config file
-func NewTopfRuntime(configPath string, nodesRegexFilter string, logLevel string) (Topf, error) {
+func NewTopfRuntime(configPath string, configDir string, nodesRegexFilter string, logLevel string) (Topf, error) {
 	topfConfig, err := config.LoadFromFile(configPath, nodesRegexFilter)
 	if err != nil {
 		return nil, err
@@ -50,6 +50,7 @@ func NewTopfRuntime(configPath string, nodesRegexFilter string, logLevel string)
 
 	return &topf{
 		TopfConfig: topfConfig,
+		configDir:  configDir,
 		logger:     logger,
 	}, nil
 }
@@ -58,6 +59,7 @@ type topf struct {
 	*config.TopfConfig
 	mu sync.Mutex
 
+	configDir     string
 	secretsBundle *secrets.Bundle
 	logger        *slog.Logger
 }
