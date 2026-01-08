@@ -3,7 +3,9 @@ package reset
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/postfinance/topf/internal/interactive"
 	"github.com/postfinance/topf/internal/topf"
 	"github.com/siderolabs/talos/pkg/machinery/api/machine"
 	"github.com/siderolabs/talos/pkg/machinery/resources/runtime"
@@ -11,6 +13,8 @@ import (
 
 // Options contains the options for the reset execution
 type Options struct {
+	// Ask for user input before resetting
+	Confirm bool
 	// Whether to perform a full wipe of the installation disk. If false, only
 	// STATE and EPHEMERAL partitions are wiped.
 	Full     bool
@@ -70,6 +74,18 @@ func Execute(ctx context.Context, t topf.Topf, opts Options) error {
 		// full wipe blindly wipes all partitions
 		if opts.Full {
 			partitions = nil
+		}
+
+		// ask for user confirmation
+		if opts.Confirm {
+			message := fmt.Sprintf("Do you want to reset %s ?", n.Node.Host)
+			if interactive.ConfirmPrompt(message) == 'n' {
+				logger.Info("skipping")
+
+				result.SkipCount++
+
+				continue
+			}
 		}
 
 		_, err = nodeClient.MachineClient.Reset(ctx, &machine.ResetRequest{

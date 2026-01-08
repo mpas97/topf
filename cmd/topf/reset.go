@@ -12,6 +12,7 @@ func newResetCmd() *cli.Command {
 		Name:  "reset",
 		Usage: "reset talos node(s) to maintenance mode",
 		Flags: []cli.Flag{
+			confirmFlag(),
 			&cli.BoolFlag{
 				Name:  "full",
 				Value: true,
@@ -34,6 +35,7 @@ func newResetCmd() *cli.Command {
 			t := MustGetRuntime(ctx)
 
 			opts := reset.Options{
+				Confirm:  c.Bool("confirm"),
 				Full:     c.Bool("full"),
 				Graceful: c.Bool("graceful"),
 				Shutdown: c.Bool("shutdown"),
