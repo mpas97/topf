@@ -65,12 +65,12 @@ func main() {
 			}
 
 			// passing down the Topf runtime to all commands via context
-			topf, err := topf.NewTopfRuntime(
-				c.String("topfconfig"),
-				configDir,
-				c.String("nodes"),
-				c.String("log-level"),
-			)
+			topf, err := topf.NewTopfRuntime(topf.RuntimeConfig{
+				ConfigPath:       c.String("topfconfig"),
+				ConfigDir:        configDir,
+				NodesRegexFilter: c.String("nodes"),
+				LogLevel:         c.String("log-level"),
+			})
 			if err != nil {
 				return ctx, err
 			}
