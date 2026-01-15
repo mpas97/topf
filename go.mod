@@ -9,6 +9,7 @@ require (
 	github.com/siderolabs/talos/pkg/machinery v1.12.1
 	github.com/urfave/cli/v3 v3.6.1
 	go.yaml.in/yaml/v4 v4.0.0-rc.3
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -20,7 +21,6 @@ require (
 	github.com/vishvananda/netns v0.0.5 // indirect
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 	sigs.k8s.io/structured-merge-diff/v6 v6.3.0 // indirect
 )
 
