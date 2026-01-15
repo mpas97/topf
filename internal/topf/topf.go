@@ -28,15 +28,39 @@ type Topf interface {
 	Nodes(context.Context) ([]*Node, error)
 }
 
-// NewTopfRuntime creates a new Topf runtime from the given config file
-func NewTopfRuntime(configPath string, nodesRegexFilter string, logLevel string) (Topf, error) {
-	topfConfig, err := config.LoadFromFile(configPath, nodesRegexFilter)
+// RuntimeConfig contains configuration for creating a Topf runtime
+type RuntimeConfig struct {
+	// ConfigPath is the path to the topf.yaml configuration file
+	ConfigPath string
+
+	// NodesRegexFilter is an optional regex pattern to filter which nodes to operate on
+	// Empty string means all nodes
+	NodesRegexFilter string
+
+	// LogLevel sets the logging verbosity (debug, info, warn, error)
+	LogLevel string
+}
+
+// NewTopfRuntime creates a new Topf runtime from the given configuration
+func NewTopfRuntime(cfg RuntimeConfig) (Topf, error) {
+	topfConfig, err := config.LoadFromFile(cfg.ConfigPath, cfg.NodesRegexFilter)
 	if err != nil {
 		return nil, err
 	}
 
+	// Validate configDir exists and is a directory
+	if stat, err := os.Stat(topfConfig.ConfigDir); err != nil {
+		if os.IsNotExist(err) {
+			return nil, fmt.Errorf("config directory does not exist: %s", topfConfig.ConfigDir)
+		}
+
+		return nil, fmt.Errorf("failed to access config directory: %w", err)
+	} else if !stat.IsDir() {
+		return nil, fmt.Errorf("config path is not a directory: %s", topfConfig.ConfigDir)
+	}
+
 	// Parse log level
-	level, err := parseLogLevel(logLevel)
+	level, err := parseLogLevel(cfg.LogLevel)
 	if err != nil {
 		return nil, fmt.Errorf("invalid log level: %w", err)
 	}
@@ -50,6 +74,7 @@ func NewTopfRuntime(configPath string, nodesRegexFilter string, logLevel string)
 
 	return &topf{
 		TopfConfig: topfConfig,
+		configDir:  topfConfig.ConfigDir,
 		logger:     logger,
 	}, nil
 }
@@ -58,6 +83,7 @@ type topf struct {
 	*config.TopfConfig
 	mu sync.Mutex
 
+	configDir     string
 	secretsBundle *secrets.Bundle
 	logger        *slog.Logger
 }

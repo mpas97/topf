@@ -33,10 +33,10 @@ func main() {
 				Sources: cli.EnvVars("TOPFCONFIG"),
 			},
 			&cli.StringFlag{
-				Name:    "nodes",
+				Name:    "nodes-filter",
 				Value:   "",
 				Usage:   "use a regex expression to select a subset of nodes to work upon",
-				Sources: cli.EnvVars("TOPF_NODES"),
+				Sources: cli.EnvVars("TOPF_NODES_FILTER"),
 			},
 			&cli.StringFlag{
 				Name:    "log-level",
@@ -47,11 +47,11 @@ func main() {
 		},
 		Before: func(ctx context.Context, c *cli.Command) (context.Context, error) {
 			// passing down the Topf runtime to all commands via context
-			topf, err := topf.NewTopfRuntime(
-				c.String("topfconfig"),
-				c.String("nodes"),
-				c.String("log-level"),
-			)
+			topf, err := topf.NewTopfRuntime(topf.RuntimeConfig{
+				ConfigPath:       c.String("topfconfig"),
+				NodesRegexFilter: c.String("nodes-filter"),
+				LogLevel:         c.String("log-level"),
+			})
 			if err != nil {
 				return ctx, err
 			}
@@ -59,7 +59,6 @@ func main() {
 			return context.WithValue(ctx, topfRuntimeCtxKey, topf), nil
 		},
 		Commands: []*cli.Command{
-			newBootstrapCmd(),
 			newApplyCmd(),
 			newUpgradeCmd(),
 			newResetCmd(),
