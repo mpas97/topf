@@ -21,6 +21,8 @@ func bootstrap(ctx context.Context, logger *slog.Logger, nodes []*topf.Node) err
 
 	logger.Info("starting bootstrap process", "timeout", "10 minutes")
 
+	alreadyBootstrapped := false
+
 	err := retry.Constant(time.Minute*10, retry.WithErrorLogging(logger.Enabled(ctx, slog.LevelDebug))).RetryWithContext(ctx, func(ctx context.Context) error {
 		// bootstrap needs to be called on any CP node, we take the first one
 		nodeClient, err := nodes[0].Client(ctx)
@@ -35,7 +37,10 @@ func bootstrap(ctx context.Context, logger *slog.Logger, nodes []*topf.Node) err
 			// Check if any message contains etcd members
 			for _, msg := range membersResp.GetMessages() {
 				if len(msg.GetMembers()) > 0 {
+					alreadyBootstrapped = true
+
 					logger.Info("etcd already bootstrapped", "member_count", len(msg.GetMembers()))
+
 					return nil // Already bootstrapped - success
 				}
 			}
@@ -53,7 +58,9 @@ func bootstrap(ctx context.Context, logger *slog.Logger, nodes []*topf.Node) err
 		return fmt.Errorf("bootstrap failed: %w", err)
 	}
 
-	logger.Info("etcd bootstrap completed successfully")
+	if !alreadyBootstrapped {
+		logger.Info("etcd bootstrap completed successfully")
+	}
 
 	return nil
 }
