@@ -4,9 +4,9 @@ import (
 	"errors"
 	"time"
 
-	"github.com/ghodss/yaml"
 	"github.com/postfinance/topf/pkg/providers"
 	"github.com/siderolabs/talos/pkg/machinery/config/generate/secrets"
+	"go.yaml.in/yaml/v4"
 )
 
 // Secrets returns the secrets bundle, loading it from the secrets provider if not already loaded
