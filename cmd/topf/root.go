@@ -1,3 +1,6 @@
+// Copyright 2026 PostFinance AG
+// SPDX-License-Identifier: MIT
+
 // Package main is the entrypoint for the Topf CLI
 package main
 

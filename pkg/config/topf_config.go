@@ -1,3 +1,6 @@
+// Copyright 2026 PostFinance AG
+// SPDX-License-Identifier: MIT
+
 // Package config contains the config structs and loading logic for Topf
 package config
 

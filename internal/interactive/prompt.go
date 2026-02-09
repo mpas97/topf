@@ -1,3 +1,6 @@
+// Copyright 2026 PostFinance AG
+// SPDX-License-Identifier: MIT
+
 // Package interactive contains code for CLI interactions
 package interactive
 

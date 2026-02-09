@@ -1,3 +1,6 @@
+// Copyright 2026 PostFinance AG
+// SPDX-License-Identifier: MIT
+
 // Package apply contains the logic to apply Talos configurations to cluster nodes
 package apply
 

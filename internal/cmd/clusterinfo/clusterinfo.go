@@ -1,3 +1,6 @@
+// Copyright 2026 PostFinance AG
+// SPDX-License-Identifier: MIT
+
 // Package clusterinfo contains the logic for the clusterinfo command
 package clusterinfo
 

@@ -1,3 +1,6 @@
+// Copyright 2026 PostFinance AG
+// SPDX-License-Identifier: MIT
+
 // Package reset contains the logic to reset a cluster back to maintenance mode
 package reset
 

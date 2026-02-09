@@ -1,3 +1,6 @@
+// Copyright 2026 PostFinance AG
+// SPDX-License-Identifier: MIT
+
 // Package upgrade contains the logic to upgrade Talos OS on cluster nodes
 package upgrade
 

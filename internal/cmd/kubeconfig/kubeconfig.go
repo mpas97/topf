@@ -1,3 +1,6 @@
+// Copyright 2026 PostFinance AG
+// SPDX-License-Identifier: MIT
+
 // Package kubeconfig contains the logic to generate a valid kubeconfig file
 package kubeconfig
 

@@ -1,3 +1,6 @@
+// Copyright 2026 PostFinance AG
+// SPDX-License-Identifier: MIT
+
 // Package sops provides utilities for reading SOPS-encrypted files
 package sops
 

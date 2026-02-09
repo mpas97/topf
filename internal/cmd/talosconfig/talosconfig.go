@@ -1,3 +1,6 @@
+// Copyright 2026 PostFinance AG
+// SPDX-License-Identifier: MIT
+
 // Package talosconfig contains the logic to generate talosconfig file
 package talosconfig
 
