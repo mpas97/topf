@@ -37,6 +37,12 @@ homebrew_casks:
       token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
     homepage: https://github.com/postfinance/topf
     description: Talos Orchestrator by PostFinance
+    hooks:
+      post:
+        install: |
+          if OS.mac?
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/topf"]
+          end
 
 changelog:
   use: github
