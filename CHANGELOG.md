@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.1] - 2026-02-10
+
+### Build
+
+- Configure homebrew integration ([8a65146](https://github.com/postfinance/topf/commit/8a6514617b76e23ac5c43e90a4912c7df9587849))
+
+### Documentation
+
+- Create mkdocs documentation ([d87c57c](https://github.com/postfinance/topf/commit/d87c57c4ff4009f4a94a9e5c1ab1ae742cad5098))
+
+### Miscellaneous
+
+- Update changelog ([e6dee58](https://github.com/postfinance/topf/commit/e6dee58d305f767a476b06ed757b6639e3ed3df3))
 ## [0.1.0] - 2026-02-10
 
 ### Bug Fixes
