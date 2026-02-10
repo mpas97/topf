@@ -36,11 +36,13 @@ func Generate(t topf.Topf) (*api.Config, error) {
 
 	clusterName := t.Config().ClusterName
 
+	contextName := "topf@" + clusterName
+
 	// Generate kubeconfig
 	kubeconfig := &api.Config{
 		APIVersion:     "v1",
 		Kind:           "Config",
-		CurrentContext: "topf@" + clusterName,
+		CurrentContext: contextName,
 		Clusters: map[string]*api.Cluster{
 			clusterName: {
 				Server:                   t.Config().ClusterEndpoint.String(),
@@ -48,13 +50,13 @@ func Generate(t topf.Topf) (*api.Config, error) {
 			},
 		},
 		Contexts: map[string]*api.Context{
-			"topf@" + clusterName: {
+			contextName: {
 				Cluster:  clusterName,
-				AuthInfo: "topf",
+				AuthInfo: contextName,
 			},
 		},
 		AuthInfos: map[string]*api.AuthInfo{
-			"topf": {
+			contextName: {
 				ClientCertificateData: clientCert,
 				ClientKeyData:         clientKey,
 			},
