@@ -27,6 +27,17 @@ dockers_v2:
       - latest
     dockerfile: Dockerfile.goreleaser
 
+homebrew_casks:
+  - name: topf
+    binaries:
+      - topf
+    repository:
+      owner: postfinance
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    homepage: https://github.com/postfinance/topf
+    description: Talos Orchestrator by PostFinance
+
 changelog:
-  use: git-cliff
+  use: github
   sort: asc

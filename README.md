@@ -13,6 +13,12 @@ and applying configuration changes.
 
 ## Installation
 
+### Homebrew
+
+```bash
+brew install postfinance/tap/topf
+```
+
 ### Go Install
 
 ```bash

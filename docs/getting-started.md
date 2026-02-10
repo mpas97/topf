@@ -10,6 +10,12 @@ TOPF is built against the Talos v1.12 machinery libraries. It should work with o
 
 ## Installation
 
+### Homebrew
+
+```bash
+brew install postfinance/tap/topf
+```
+
 ### Go Install
 
 ```bash
