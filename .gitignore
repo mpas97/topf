@@ -7,3 +7,5 @@ talosconfig
 kubeconfig
 !kubeconfig/
 .sops.yaml
+dist/
+topf

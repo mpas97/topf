@@ -1,6 +1,29 @@
 # TOPF - Talos Orchestrator by PostFinance
 
-TOPF is managing [Talos](https://www.talos.dev/) based Kubenetes clusters. It provides functionality for bootstrapping new clusters, resetting existing ones, and applying configuration changes.
+[![Go Version](https://img.shields.io/github/go-mod/go-version/postfinance/topf)](https://go.dev/)
+[![License](https://img.shields.io/github/license/postfinance/topf)](LICENSE)
+[![Go Report Card](https://goreportcard.com/badge/github.com/postfinance/topf)](https://goreportcard.com/report/github.com/postfinance/topf)
+[![Latest Release](https://img.shields.io/github/v/release/postfinance/topf)](https://github.com/postfinance/topf/releases/latest)
+
+TOPF is managing [Talos](https://www.talos.dev/) based Kubernetes clusters. It provides functionality for bootstrapping new clusters, resetting existing ones, and applying configuration changes.
+
+## Installation
+
+### Go Install
+
+```bash
+go install github.com/postfinance/topf/cmd/topf@latest
+```
+
+### Binary Download
+
+Download the latest binary from [GitHub Releases](https://github.com/postfinance/topf/releases/latest).
+
+### Container Image
+
+```bash
+docker pull ghcr.io/postfinance/topf
+```
 
 ## Quickstart
 

@@ -17,6 +17,11 @@ tasks:
       - echo "Cleaning..."
       - rm -rf bin
 
+  snapshot:
+    desc: Build a local snapshot release with goreleaser
+    cmds:
+      - goreleaser release --snapshot --clean
+
   lint:
     desc: Run linter
     cmds:
