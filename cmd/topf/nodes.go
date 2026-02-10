@@ -106,9 +106,9 @@ func renderNodesTable(nodes []*topf.Node) error {
 		}
 
 		if len(node.MachineStatus.Status.UnmetConditions) > 0 {
-			var conditions []string
-			for _, cond := range node.MachineStatus.Status.UnmetConditions {
-				conditions = append(conditions, cond.Name+": "+cond.Reason)
+			conditions := make([]string, len(node.MachineStatus.Status.UnmetConditions))
+			for i, cond := range node.MachineStatus.Status.UnmetConditions {
+				conditions[i] = cond.Name + ": " + cond.Reason
 			}
 
 			unmetConditions = strings.Join(conditions, "\n")
