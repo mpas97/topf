@@ -8,6 +8,5 @@ kubeconfig
 !kubeconfig/
 .sops.yaml
 dist/
-topf
 CHANGES.md
 venv/mkdocs
