@@ -28,6 +28,12 @@ Configuration is built from [layered patches](configuration-model.md) — small,
 
 TOPF uses the Talos Go libraries directly, so there are no intermediate config files to manage and no dependency on `talosctl` for day-to-day operations.
 
+## Philosophy
+
+TOPF doesn't reinvent the wheel. Under the hood it uses the Talos Go libraries directly — the same operations you would run manually with `talosctl`, but automated with health checks, diffs, and safety prompts on top.
+
+Where TOPF really shines is its [configuration model](configuration-model.md). Instead of managing one monolithic machine config per node, you compose small, scoped patches — per cluster, per role, or per host. This layered approach keeps configurations DRY, easy to review in pull requests, and straightforward to share across environments.
+
 ## Non-goals
 
 TOPF is intentionally limited in scope:

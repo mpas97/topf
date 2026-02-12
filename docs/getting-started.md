@@ -57,8 +57,18 @@ Create a new patch to specify the install disk and desired talos version:
 machine:
   install:
     disk: /dev/vda
-    image: factory.talos.dev/metal-installer/376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba:v1.11.5
+    image: factory.talos.dev/metal-installer/376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba:v1.12.3
 ```
+
+!!! info "Obtaining the schematic ID"
+
+    The long hash in the installer URL (`376567988a...`) is a **schematic ID** — a content-addressable
+    hash of your extensions and overlay configuration. TOPF does not resolve extensions to schematic IDs;
+    you must obtain the ID yourself.
+
+    Use the [Image Factory UI](https://factory.talos.dev) to select your desired system extensions and
+    generate the schematic ID, or see the [Talos Image Factory docs](https://www.talos.dev/v1.12/learn-more/image-factory/)
+    for the full API reference.
 
 Then run `topf apply --auto-bootstrap` to provision the cluster.
 
