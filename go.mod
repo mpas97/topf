@@ -9,8 +9,8 @@ require (
 	github.com/jedib0t/go-pretty/v6 v6.8.3
 	github.com/siderolabs/go-retry v0.3.3
 	github.com/siderolabs/image-factory v1.6.0
-	github.com/siderolabs/talos v1.14.0
-	github.com/siderolabs/talos/pkg/machinery v1.14.0
+	github.com/siderolabs/talos v1.14.1
+	github.com/siderolabs/talos/pkg/machinery v1.14.1
 	github.com/urfave/cli/v3 v3.11.0
 	go.yaml.in/yaml/v4 v4.0.0-rc.6.0.20260809190231-643e93b9c9be
 	gopkg.in/yaml.v3 v3.0.1
@@ -117,7 +117,7 @@ require (
 	github.com/ryanuber/go-glob v1.0.0 // indirect
 	github.com/sasha-s/go-deadlock v0.3.9 // indirect
 	github.com/siderolabs/crypto v0.6.5
-	github.com/siderolabs/gen v0.8.7 // indirect
+	github.com/siderolabs/gen v0.8.8 // indirect
 	github.com/siderolabs/go-api-signature v0.3.13 // indirect
 	github.com/siderolabs/go-pointer v1.0.1 // indirect
 	github.com/siderolabs/net v0.4.0 // indirect
