@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"strings"
 
 	"github.com/postfinance/topf/internal/topf"
 	talosversion "github.com/siderolabs/talos/pkg/machinery/version"
@@ -76,8 +77,7 @@ func main() {
 			},
 		},
 		Before: func(ctx context.Context, c *cli.Command) (context.Context, error) {
-			// allow showing root command help and completion command
-			if len(os.Args) == 1 || os.Args[1] == "completion" {
+			if isHelpOrCompletionInvocation() {
 				return ctx, nil
 			}
 
@@ -111,6 +111,10 @@ func main() {
 		},
 	}
 
+	for _, c := range app.Commands {
+		c.ShellComplete = completeWithRootFlags
+	}
+
 	if err := app.Run(context.Background(), os.Args); err != nil {
 		slog.Error("error", "error", err)
 		os.Exit(1)
@@ -130,9 +134,57 @@ func MustGetRuntime(ctx context.Context) topf.Topf {
 // noPositionalArgs is a Before hook that rejects any positional arguments.
 // Use this for commands that only accept flags.
 func noPositionalArgs(ctx context.Context, c *cli.Command) (context.Context, error) {
+	if isHelpOrCompletionInvocation() {
+		return ctx, nil
+	}
+
 	if c.Args().Len() > 0 {
 		return ctx, fmt.Errorf("unexpected argument(s): %v. Did you mean to use flags? (e.g., --flag=value instead of flag=value)", c.Args().Slice())
 	}
 
 	return ctx, nil
+}
+
+// isHelpOrCompletionInvocation reports whether topf was invoked to show help
+// or generate shell completions, where the runtime is not required.
+func isHelpOrCompletionInvocation() bool {
+	if len(os.Args) == 1 || os.Args[1] == "completion" {
+		return true
+	}
+
+	for _, arg := range os.Args[1:] {
+		if arg == "--generate-shell-completion" {
+			return true
+		}
+	}
+
+	return false
+}
+
+// completeWithRootFlags additionally suggests root flags on subcommands,
+// which the default completion does not do.
+func completeWithRootFlags(ctx context.Context, c *cli.Command) {
+	cli.DefaultCompleteWithFlags(ctx, c)
+
+	if c.Root() == c {
+		return
+	}
+
+	args := os.Args
+	if len(args) > 2 && strings.HasPrefix(args[len(args)-2], "-") {
+		completeRootFlags(ctx, c.Root())
+	}
+}
+
+// completeRootFlags suggests root flags, except help and version which the
+// subcommand pass already suggests.
+func completeRootFlags(ctx context.Context, root *cli.Command) {
+	for _, f := range root.Flags {
+		name := strings.TrimSpace(f.Names()[0])
+		if name == "help" || name == "version" {
+			continue
+		}
+
+		cli.DefaultCompleteWithFlags(ctx, &cli.Command{Flags: []cli.Flag{f}, Writer: root.Writer})
+	}
 }
