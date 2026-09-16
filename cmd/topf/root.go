@@ -56,6 +56,12 @@ func main() {
 				Sources: cli.EnvVars("LOG_LEVEL"),
 			},
 			&cli.BoolFlag{
+				Name:    "json-log",
+				Value:   false,
+				Usage:   "emit json logs instead of human readable text",
+				Sources: cli.EnvVars("TOPF_JSON_LOG"),
+			},
+			&cli.BoolFlag{
 				Name:        "redact",
 				Value:       true,
 				Usage:       "redact sensitive values (secrets, private keys) from output",
@@ -81,11 +87,17 @@ func main() {
 				return ctx, nil
 			}
 
-			// passing down the Topf runtime to all commands via context
+			logger, err := topf.NewLogger(c.String("log-level"), c.Bool("json-log"))
+			if err != nil {
+				return ctx, err
+			}
+
+			slog.SetDefault(logger)
+
 			topf, err := topf.NewTopfRuntime(topf.RuntimeConfig{
 				ConfigPath:       c.String("topfconfig"),
 				NodesRegexFilter: c.String("nodes-filter"),
-				LogLevel:         c.String("log-level"),
+				Logger:           logger,
 				Redact:           c.Bool("redact"),
 				Confirm:          c.Bool("confirm"),
 				SubmitToFactory:  c.Bool("submit-to-factory"),
@@ -116,7 +128,7 @@ func main() {
 	}
 
 	if err := app.Run(context.Background(), os.Args); err != nil {
-		slog.Error("error", "error", err)
+		slog.Error("failed to run command", "error", err)
 		os.Exit(1)
 	}
 }
