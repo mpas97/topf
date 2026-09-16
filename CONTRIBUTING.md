@@ -17,6 +17,13 @@ task test    # go test -v -race ./...
 
 Requires Go 1.26+, [Task](https://taskfile.dev/), and `sops`/`age`/`vals` for secrets tests.
 
+## Pull requests
+
+Pull requests against this repo must allow maintainers to push to your branch.
+On GitHub this is the "Allow edits by maintainers" option, which is only
+available when your PR is based on a branch other than your fork's main (e.g.
+feat/my-feature).
+
 ## Conventions
 
 - Conventional commits (`feat:`, `fix:`, `docs:`, …); changelog is generated from them.
