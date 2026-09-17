@@ -77,9 +77,9 @@ func newUpgradeCmd() *cli.Command {
 				DefaultText: defaultTextFalse,
 			},
 			&cli.BoolFlag{
-				Name:        "skip-node-prechecks",
-				Usage:       "skip the pre-upgrade checks that require every node to be reachable and in the \"running\" stage; needed to upgrade a node that is stuck in another stage (e.g. after a bad machine image), at the cost of no longer aborting early on unhealthy nodes",
-				Sources:     cli.EnvVars("TOPF_SKIP_NODE_PRECHECKS"),
+				Name:        "allow-not-ready",
+				Usage:       "allow upgrading nodes that are not ready (have unmet conditions)",
+				Sources:     cli.EnvVars("TOPF_ALLOW_NOT_READY"),
 				DefaultText: defaultTextFalse,
 			},
 			&cli.BoolFlag{
@@ -122,7 +122,7 @@ func newUpgradeCmd() *cli.Command {
 				DryRun:                c.Bool("dry-run"),
 				RebootMode:            rebootMode,
 				Force:                 c.Bool("force"),
-				SkipNodePreChecks:     c.Bool("skip-node-prechecks"),
+				AllowNotReady:         c.Bool("allow-not-ready"),
 				Drain:                 c.Bool("drain"),
 				DrainTimeout:          c.Duration("drain-timeout"),
 				StabilizationDuration: c.Duration("stabilization-duration"),

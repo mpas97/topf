@@ -16,71 +16,16 @@ All flags can also be set via environment variables using the `TOPF_` prefix and
 | `--stabilization-duration` | `30s` | How long a node must stay ready after rebooting before it is considered stable |
 | `--delete-if-eviction-fails` | `false` | If graceful drain fails (e.g. a PodDisruptionBudget blocks eviction), retry by deleting pods directly (DELETE instead of EVICT, bypassing PDBs); reuses `--drain-timeout` for the delete fallback *(modern flow only)* |
 | `--force` | `false` | Skip etcd health checks; only applies to nodes running Talos < 1.13 (legacy `MachineService.Upgrade` RPC); has no effect on Talos >= 1.13, where the `LifecycleService.Upgrade` RPC validates etcd health server-side |
-| `--skip-node-prechecks` | `false` | Skip the pre-upgrade checks that require every node to be reachable and in the `running` stage; needed to upgrade a node that is stuck in another stage (e.g. after a bad machine image) |
+| `--allow-not-ready` | `false` | Allow upgrading nodes that are not ready (have unmet conditions) |
 | `--stage` | `false` | Install upgrade artifacts without rebooting; the node is left running and can be labeled/annotated/tainted (see `--stage-label`/`--stage-annotation`/`--stage-taint`) so an external controller or human reboots it later |
 | `--stage-label` | - | Kubernetes node label to apply after staging (`key=value`); can be repeated; requires `--stage` |
 | `--stage-annotation` | - | Kubernetes node annotation to apply after staging (`key=value`); can be repeated; requires `--stage` |
 | `--stage-taint` | - | Kubernetes node taint to apply after staging (`key=value:Effect`); can be repeated; requires `--stage` |
 | [`--nodes-filter`](../configuration.md#filtering-nodes) | - | Regex pattern to filter which nodes to operate on (global flag) |
 
-> **Upgrade API selection.** Nodes running Talos >= 1.13 use the modern
-> `LifecycleService.Upgrade` streaming RPC (pre-pull, install, separate
-> reboot). Nodes running Talos < 1.13 fall back to the legacy
-> `MachineService.Upgrade` RPC, which installs, drains, and reboots in a
-> single server-side sequence. The `--force` flag is only meaningful on
-> the legacy path; `--drain` and `--drain-timeout` are only meaningful on
-> the modern path.
->
-> **When to use `--delete-if-eviction-fails`.** The graceful drain uses the
-> Kubernetes eviction API, which respects PodDisruptionBudgets. A PDB with
-> `minAvailable: 1` on a single-replica pod (e.g. a standalone database
-> StatefulSet) will block eviction until `--drain-timeout` expires and the
-> drain fails. `--delete-if-eviction-fails` retries the drain with direct
-> pod deletion (DELETE instead of EVICT), bypassing PDBs — the pod is
-> killed and its controller reschedules it elsewhere. The delete fallback
-> reuses `--drain-timeout` as its timeout.
->
-> Note that the drain always runs with `kubectl drain --force` semantics
-> (unmanaged pods are deleted, emptyDir data is removed) — this is the
-> default behavior for a rebooting node and is not controlled by
-> `--delete-if-eviction-fails`. The flag only switches the eviction API to
-> direct deletion for the fallback attempt, which is what lets it bypass
-> PDBs.
->
-> **When to use `--skip-node-prechecks`.** By default the upgrade aborts if
-> any node is unreachable or not in the `running` stage, so a broken cluster
-> is not made worse. That check also blocks the recovery case: a node that
-> fails to boot after an upgrade (e.g. a bad machine image) never reaches
-> `running`, so no upgrade — not even one back to a known-good installer —
-> can be issued for it. `--skip-node-prechecks` bypasses the check and goes
-> straight to the plan phase. Unhealthy nodes are no longer caught up front;
-> they fail individually once their own upgrade is attempted. Combine it with
-> [`--nodes-filter`](../configuration.md#filtering-nodes) to target only the
-> node that needs recovering. Note that with `--dry-run` the pre-checks are
-> still skipped and nothing is actually attempted, so a node that is stuck in
-> a non-`running` stage will not surface an error in the dry-run output.
->
-> **Staging upgrades with `--stage`** *(Talos >= 1.13 only)*. Sometimes you
-> want to install new Talos artifacts on nodes without immediately rebooting
-> them — e.g. to spread reboots over a maintenance window or let an external
-> controller (such as a drain scheduler) reboot nodes one at a time. `--stage`
-> installs the upgrade artifacts but skips the drain, reboot, and uncordon
-> steps. The node continues running on its current kernel until it is manually
-> rebooted, at which point the staged upgrade takes effect.
->
-> `--stage-label`, `--stage-annotation`, and `--stage-taint` mark the
-> Kubernetes node so controllers or humans can identify nodes with a pending
-> reboot. For example,
-> `--stage-taint topf.postfinance.ch/staged-upgrade=true:PreferNoSchedule`
-> discourages new pods from scheduling on the node until it is rebooted and
-> the taint is removed. All three flags can be repeated and require `--stage`.
-> `--stage` takes precedence over `--drain` and `--delete-if-eviction-fails`;
-> both are silently ignored when staging. No need to pass `--drain=false`
-> with `--stage`.
-
 ## Behavior
 
-1. **Pre-flight checks**: Ensures all nodes are reachable and in the `running` stage (skipped with `--skip-node-prechecks`)
+1. **Pre-flight checks**: Ensures all nodes are reachable, in a processable stage (`running` or `booting`; a node in `maintenance` needs its config applied first — see `topf apply`), and ready (readiness check skipped with `--allow-not-ready`)
 1. **Version comparison**: Extracts schematic and version from the installer image and only upgrades nodes where either differs from the current state
 1. **Per-node confirmation**: Before each upgrade (unless `--confirm=false`, see [global flags](../configuration.md#global-flags))
 1. **API selection**: Per node, if the running Talos version is >= 1.13.0, the modern flow (a) is used; otherwise the legacy flow (b) is used
@@ -188,8 +133,8 @@ topf upgrade --delete-if-eviction-fails
 # Upgrade with a longer drain timeout (shared by graceful and fallback)
 topf upgrade --delete-if-eviction-fails --drain-timeout=10m
 
-# Upgrade a node stuck in a non-running stage (e.g. after a bad machine image)
-topf upgrade --skip-node-prechecks --nodes-filter '^node1$'
+# Upgrade a node that is not ready (e.g. stuck with unmet conditions)
+topf upgrade --allow-not-ready --nodes-filter '^node1$'
 
 # Stage an upgrade without rebooting (reboot manually later to complete it)
 topf upgrade --stage

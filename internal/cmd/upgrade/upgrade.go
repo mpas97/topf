@@ -50,10 +50,8 @@ type Options struct {
 	// server-side and has no force knob.
 	Force bool
 
-	// SkipNodePreChecks skips the pre-upgrade checks that require every
-	// node to be reachable and in the "running" stage. Needed to upgrade a
-	// node that is stuck in another stage, e.g. after a bad machine image.
-	SkipNodePreChecks bool
+	// AllowNotReady allows upgrading nodes that are not ready (have unmet conditions).
+	AllowNotReady bool
 
 	// Drain controls whether the Kubernetes node is cordoned and drained
 	// before the reboot and uncordoned after the node becomes Ready again.
@@ -217,20 +215,10 @@ func validateOptions(opts *Options) error {
 	return nil
 }
 
-// preChecks verifies that every node is reachable and running before any
-// upgrade is attempted, reporting all problems at once. It is a no-op when
-// opts.SkipNodePreChecks is set.
+// preChecks verifies that every node is reachable, in a processable stage
+// (maintenance is not processable for upgrades), and ready, reporting all
+// problems at once. The readiness check is skipped when opts.AllowNotReady.
 func preChecks(logger *slog.Logger, nodes []*topf.Node, opts Options) error {
-	if opts.SkipNodePreChecks {
-		if opts.DryRun {
-			logger.Warn("skipping node pre-checks in dry-run mode: unreachable or non-running nodes will not be reported")
-		} else {
-			logger.Warn("skipping node pre-checks: unreachable or non-running nodes will only fail once their upgrade is attempted")
-		}
-
-		return nil
-	}
-
 	abort := false
 
 	for _, node := range nodes {
@@ -244,12 +232,22 @@ func preChecks(logger *slog.Logger, nodes []*topf.Node, opts Options) error {
 			continue
 		}
 
-		if !slices.Contains([]runtime.MachineStage{runtime.MachineStageRunning}, node.MachineStatus.Stage) {
-			logger.Error("node must be 'running' for upgrade", "stage", node.MachineStatus.Stage.String())
+		if !opts.AllowNotReady && !node.MachineStatus.Status.Ready {
+			logger.Error("node not ready", "unmet conditions", node.MachineStatus.Status.UnmetConditions)
 
 			abort = true
+		}
 
-			continue
+		st := node.MachineStatus.Stage
+		switch {
+		case st == runtime.MachineStageMaintenance:
+			logger.Error("node is in maintenance mode; apply its configuration first (topf apply), then upgrade")
+
+			abort = true
+		case !slices.Contains([]runtime.MachineStage{runtime.MachineStageRunning, runtime.MachineStageBooting}, st):
+			logger.Error("node in unprocessable stage", "stage", st.String())
+
+			abort = true
 		}
 	}
 
