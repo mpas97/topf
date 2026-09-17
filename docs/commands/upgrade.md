@@ -16,7 +16,7 @@ All flags can also be set via environment variables using the `TOPF_` prefix and
 | `--stabilization-duration` | `30s` | How long a node must stay ready after rebooting before it is considered stable |
 | `--delete-if-eviction-fails` | `false` | If graceful drain fails (e.g. a PodDisruptionBudget blocks eviction), retry by deleting pods directly (DELETE instead of EVICT, bypassing PDBs); reuses `--drain-timeout` for the delete fallback *(modern flow only)* |
 | `--force` | `false` | Skip etcd health checks; only applies to nodes running Talos < 1.13 (legacy `MachineService.Upgrade` RPC); has no effect on Talos >= 1.13, where the `LifecycleService.Upgrade` RPC validates etcd health server-side |
-| `--skip-node-prechecks` | `false` | Skip the pre-upgrade checks that require every node to be reachable and in the `Running` stage; needed to upgrade a node that is stuck in another stage (e.g. after a bad machine image) |
+| `--skip-node-prechecks` | `false` | Skip the pre-upgrade checks that require every node to be reachable and in the `running` stage; needed to upgrade a node that is stuck in another stage (e.g. after a bad machine image) |
 | `--stage` | `false` | Install upgrade artifacts without rebooting; the node is left running and can be labeled/annotated/tainted (see `--stage-label`/`--stage-annotation`/`--stage-taint`) so an external controller or human reboots it later |
 | `--stage-label` | - | Kubernetes node label to apply after staging (`key=value`); can be repeated; requires `--stage` |
 | `--stage-annotation` | - | Kubernetes node annotation to apply after staging (`key=value`); can be repeated; requires `--stage` |
@@ -48,15 +48,17 @@ All flags can also be set via environment variables using the `TOPF_` prefix and
 > PDBs.
 >
 > **When to use `--skip-node-prechecks`.** By default the upgrade aborts if
-> any node is unreachable or not in the `Running` stage, so a broken cluster
+> any node is unreachable or not in the `running` stage, so a broken cluster
 > is not made worse. That check also blocks the recovery case: a node that
 > fails to boot after an upgrade (e.g. a bad machine image) never reaches
-> `Running`, so no upgrade — not even one back to a known-good installer —
+> `running`, so no upgrade — not even one back to a known-good installer —
 > can be issued for it. `--skip-node-prechecks` bypasses the check and goes
 > straight to the plan phase. Unhealthy nodes are no longer caught up front;
 > they fail individually once their own upgrade is attempted. Combine it with
 > [`--nodes-filter`](../configuration.md#filtering-nodes) to target only the
-> node that needs recovering.
+> node that needs recovering. Note that with `--dry-run` the pre-checks are
+> still skipped and nothing is actually attempted, so a node that is stuck in
+> a non-`running` stage will not surface an error in the dry-run output.
 >
 > **Staging upgrades with `--stage`** *(Talos >= 1.13 only)*. Sometimes you
 > want to install new Talos artifacts on nodes without immediately rebooting
@@ -78,7 +80,7 @@ All flags can also be set via environment variables using the `TOPF_` prefix and
 
 ## Behavior
 
-1. **Pre-flight checks**: Ensures all nodes are reachable and in the `Running` stage (skipped with `--skip-node-prechecks`)
+1. **Pre-flight checks**: Ensures all nodes are reachable and in the `running` stage (skipped with `--skip-node-prechecks`)
 1. **Version comparison**: Extracts schematic and version from the installer image and only upgrades nodes where either differs from the current state
 1. **Per-node confirmation**: Before each upgrade (unless `--confirm=false`, see [global flags](../configuration.md#global-flags))
 1. **API selection**: Per node, if the running Talos version is >= 1.13.0, the modern flow (a) is used; otherwise the legacy flow (b) is used

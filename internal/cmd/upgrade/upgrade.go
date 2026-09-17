@@ -222,7 +222,11 @@ func validateOptions(opts *Options) error {
 // opts.SkipNodePreChecks is set.
 func preChecks(logger *slog.Logger, nodes []*topf.Node, opts Options) error {
 	if opts.SkipNodePreChecks {
-		logger.Warn("skipping node pre-checks: unreachable or non-running nodes will only fail once their upgrade is attempted")
+		if opts.DryRun {
+			logger.Warn("skipping node pre-checks in dry-run mode: unreachable or non-running nodes will not be reported")
+		} else {
+			logger.Warn("skipping node pre-checks: unreachable or non-running nodes will only fail once their upgrade is attempted")
+		}
 
 		return nil
 	}
