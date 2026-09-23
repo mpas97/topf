@@ -34,7 +34,7 @@ func ConfirmPrompt(prompt string) rune {
 	reader := bufio.NewReader(os.Stdin)
 
 	for {
-		fmt.Printf("%s [y/n]: ", prompt)
+		fmt.Fprintf(os.Stderr, "%s [y/n]: ", prompt)
 
 		input, err := reader.ReadString('\n')
 		input = strings.ToLower(strings.TrimSpace(input))
@@ -47,12 +47,12 @@ func ConfirmPrompt(prompt string) rune {
 		default:
 			// no further read can succeed, so decline instead of reprompting forever
 			if err != nil {
-				fmt.Println()
+				fmt.Fprintln(os.Stderr)
 
 				return 'n'
 			}
 
-			fmt.Println("Please enter y or n")
+			fmt.Fprintln(os.Stderr, "Please enter y or n")
 		}
 	}
 }
