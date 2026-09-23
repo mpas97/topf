@@ -94,6 +94,10 @@ func main() {
 
 			slog.SetDefault(logger)
 
+			// stdlib log output (e.g. go-retry's "retrying error" messages) is routed through the
+			// default slog logger at info level; map it to debug instead.
+			slog.SetLogLoggerLevel(slog.LevelDebug)
+
 			topf, err := topf.NewTopfRuntime(topf.RuntimeConfig{
 				ConfigPath:       c.String("topfconfig"),
 				NodesRegexFilter: c.String("nodes-filter"),
