@@ -6,12 +6,12 @@ The secrets bundle contains all sensitive cluster material including private key
 
 ## New Secrets
 
-When no existing secrets bundle is found, a new one is generated and stored automatically — no output redirection is needed to create the file. Where it is stored depends on the configuration:
+When no existing secrets bundle is found, a new one is generated and stored automatically. Where it is stored depends on the configuration:
 
 - **Default (no `secretsProvider`):** the bundle is written to the local filesystem, next to `topf.yaml` as `secrets.yaml` (or the path set via `secretsPath`). It is SOPS-encrypted on write if a corresponding SOPS config is found; otherwise it is stored as plaintext.
 - **With a `secretsProvider`:** the bundle is sent to the configured provider binary instead (see [secrets provider](../providers.md#secrets-provider)).
 
-The bundle printed to stdout is **not redacted**, even when `--redact` is enabled: it contains the actual secrets, so take care when piping or copying the output.
+Regardless of whether the bundle was loaded from storage or freshly generated, `topf secrets` also prints it to stdout; storage happens automatically, so no output redirection is needed to create the file. The printed bundle is **not redacted**, even when `--redact` is enabled: it contains the actual secrets, so take care when piping or copying the output.
 
 ## Confirmation
 
